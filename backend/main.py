@@ -43,3 +43,29 @@ def create_todo( new_todo: TodoCreate, db = Depends(get_db)):
     db.add(db_todo)
     db.commit()
     return {"message": "Todo successfully created"}
+
+
+class TodoUpdate(BaseModel):
+    title: str
+
+
+@app.put("/todos/{todo_id}")
+def update_todo(todo_id: int, request_data: TodoUpdate, db = Depends(get_db)):
+    todo_item = db.query(Todo).filter(Todo.id == todo_id).first()
+    if not todo_item:
+        raise HTTPException(status_code=404, detail="Todo not found")
+
+    todo_item.title = request_data.title
+    db.add(todo_item)
+    db.commit()
+    return {"message": "Todo successfully updated"}
+
+@app.delete("/todos/{todo_id}")
+def delete_todo(todo_id: int, db = Depends(get_db)):
+    todo_item = db.query(Todo).filter(Todo.id == todo_id).first()
+    if not todo_item:
+        raise HTTPException(status_code=404, detail="Todo not found")
+
+    db.delete(todo_item)
+    db.commit()
+    return {"message": "Todo successfully deleted"}
